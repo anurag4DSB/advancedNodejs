@@ -10,8 +10,6 @@ const pendingTimers = [];
 const pendingOSTasks = [];
 const pendingOperations = [];
 
-
-
 /**
  * # 1
  *
@@ -50,12 +48,24 @@ function shouldContinue() {
  * In short, entire body executes in one 'tick'
  */
 while(shouldContinue()) {
+    // Step one: Node looks at pendingTimers and sees if any function are ready to be called(any timeouts expired?)
+    // - setTimeout, setInterval
 
+    // Step two: Node looks at pendingOSTasks or pendingOperations and calls relevant callbacks (Example: some request
+    // comes into some port that the server is listening on or if some file has been successfully retrieved off HDD.
+    // Then during this stage node will detect that these steps have been completed and will call the relevant
+    // callbacks, like callback to receive a file thats been fetched or can be a callback to handle an incoming request)
+
+    // Step three: Pause execution(different from while loop). During this pause node just sits around and waits for
+    // new events to occur. Continue when...
+    // - a new pendingOSTask is done
+    // - a new pendingOperation is done
+    // - a timer is about to complete/expire
+
+    // Step four: Look at pendingTimers.Call any setImmediate
+
+    // Step five: Handle any 'close' events
+    // - Example: readStream.on('close', () => console.log('cleanupCode'))
 }
-
-
-
-
-
 
 // exit back to terminal
