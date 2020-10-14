@@ -16,7 +16,8 @@ const pendingOperations = [];
  * $ node myFile.js
  * When the above command is run, the event loop does not immediately get executed.
  * At the very start first invoke node and feed in a file, node takes the contents of the myFile.js file and executes
- * all the code inside of it, all the code that we wrote.
+ * all the code inside of it, all the code that we wrote along with the require statements, all those files/packages
+ * are also executed.
  */
 myFile.runContents();
 
@@ -35,7 +36,7 @@ function shouldContinue() {
     // Check one: Any pending setTimeout, setInterval, setImmediate?
     // Check two: Any pending OS tasks? (like server listening to some given port)
     // Check three: Any pending long running operations? (Like function call in the fs module for reading file from HDD)
-    return pendingTimers.length || pendingOSTasks.length || pendingOSTasks.length;
+    return pendingTimers.length || pendingOSTasks.length || pendingOperations.length;
 }
 
 /**
