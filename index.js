@@ -1,29 +1,41 @@
-process.env.UV_THREADPOOL_SIZE = 1;
-const cluster = require('cluster');
 
-// Is the file being executed in master mode?
-if (cluster.isMaster) {
-    // Cause index.js to be executed *again* but in child mode
-    cluster.fork();
-    cluster.fork();
-} else {
-    // I am a child and I am going to act like a server and do nothing else
-    const crypto = require('crypto');
-    const express = require('express')
-    app = express();
+const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
+const crypto = require('crypto');
+const express = require('express')
+const { Worker} =  require('webworker-threads');
 
-    app.get('/', (req, res) => {
-        crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
-            res.send('Hello World');
-        });
-    })
 
-    app.get('/fast', (req, res) => {
-        res.send('This was fast');
-    })
+const app = express();
 
-    app.listen(3000);
-}
+app.get('/', (req, res) => {
+    // cannot use variables outside the closure scope in Worker thread. It executed separately
+    // We use function keyword purposely. If we use () => {}, the keyword 'this' will correspond to route handler
+    // and not the worker.
+    const worker = new Worker(function()  {
+        this.onmessage = function()  {
+            let counter = 0;
+            while (counter < 1e9) {
+                counter++;
+            }
+            postMessage(counter);
+        }
+
+    });
+
+    worker.onmessage = function(message) {
+        console.log(message.data);
+        // if we send a number in res.send express thinks its status code.
+        res.send(`${message.data}`);
+    }
+
+    worker.postMessage();
+})
+
+app.get('/fast', (req, res) => {
+    res.send('This was fast');
+})
+
+app.listen(3000);
 
 /**
  * Apache Benchmarking
